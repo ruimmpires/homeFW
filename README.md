@@ -49,8 +49,21 @@ This iteration of the project holds several parts:
 * install Splunk
 * collect logs from local server
 * collect logs from home ssh server
+* push alarms to Slack
+* push alarms to MQTT
 * collect logs from home web server
 ### Splunk
+...
+### Splunk to Slack
+...
+In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
+![pic](suricata_alarm_config_1.png)
+I got the scheduled alarms in my Slack for mobile:  !([pic]suricata_alarm_mobile_1.png).
+
+However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
+
+...
+### Splunk to MQTT
 ...
 ### collect logs from local server
 ...
@@ -59,7 +72,7 @@ This iteration of the project holds several parts:
 ### collect logs from home web server
 ...
 ### Results
-...
+Still ongoing, but already have some results.
 #### Good
 ...
 #### Bad
