@@ -58,7 +58,7 @@ This iteration of the project holds several parts:
 ...
 In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
 ![pic](suricata_alarm_config_1.png)
-I got the scheduled alarms in my Slack for mobile:  !([pic]splunk_to_slack_alarm_mobile_1.png).
+I got the scheduled alarms in my Slack for mobile:  ![pic](splunk_to_slack_alarm_mobile_1.png).
 
 However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
 
