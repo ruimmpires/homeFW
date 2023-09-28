@@ -70,13 +70,41 @@ However, the message is not populated as I expected. The link also fails because
 ...
 ### collect logs from home ssh server
 Should be easy with the Splunk Universal forwarder, as explained here https://ethicalhackingguru.com/put-splunk-universal-forwarder-on-raspberry-pi/ or here https://community.splunk.com/t5/Getting-Data-In/Universal-Forwarder-on-Raspberry-Pi/m-p/58046. However, seems it is no longer supported. I've tried the officall versions available  at https://www.splunk.com/en_us/download/universal-forwarder.html, but they seemed not to work. Splunk also details how to install, but the link does not work at all: https://www.splunk.com/en_us/blog/industries/how-to-splunk-data-from-a-raspberry-pi-three-easy-steps.html.
+
 So I've tried the solution with syslog. 
-...
+
 #### Syslog receiver in Splunk
 ...
 #### Syslog sending from RPi to Splunk
-Quite easy task.
-
+Quite easy task, this is a good guide: https://rubysash.com/operating-system/linux/setup-rsyslog-client-forwarder-on-raspberry-pi/
+Install rsyslog, and configure the IP of splunk:
+```
+sudo apt-get purge rsyslog
+sudo nano /etc/rsyslog.conf
+...
+auth,authpriv.*                 /var/log/auth.log
+*.*;auth,authpriv.none          -/var/log/syslog
+daemon.*                        -/var/log/daemon.log
+kern.*                          -/var/log/kern.log
+lpr.*                           -/var/log/lpr.log
+mail.*                          -/var/log/mail.log
+user.*                          -/var/log/user.log
+...
+*.* @@192.168.1.151
+```
+You can leave as default. The above link also provides easy ways to troubleshoot:
+```
+# service
+sudo systemctl status rsyslog.service
+# tcp dump
+sudo tcpdump -nnei any port 514
+tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
+listening on any, link-type LINUX_SLL (Linux cooked), capture size 262144 bytes
+17:10:43.093791 Out dc:a6:32:40:1b:03 ethertype IPv4 (0x0800), length 157: 192.168.1.201.56700 > 192.168.1.151.514: Flags [P.], seq 2637753760:2637753849, ack 1880310178, win 502, options [nop,nop,TS val 2720338900 ecr 4067312830], length 89
+17:10:43.101651  In 60:67:20:87:81:4c ethertype IPv4 (0x0800), length 68: 192.168.1.151.514 > 192.168.1.201.56700: Flags [.], ack 89, win 1641, options [nop,nop,TS val 4067317095 ecr 2720338900], length 0
+# test message
+logger -p daemon.emerg "DANGER WILL ROBINSON!!!"
+```
 
 #### Dashboard in Splunk
 Created the new searches and saved to the RPI4 dashboard:
