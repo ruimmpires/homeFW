@@ -130,6 +130,7 @@ The data may be useful:
  * requestor system
 
 Let's try to send it to splunk via syslog:
+WRONG!!!!
 ```
 sudo nano /etc/rsyslog.conf
 ...
