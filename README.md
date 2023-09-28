@@ -69,11 +69,15 @@ However, the message is not populated as I expected. The link also fails because
 ### collect logs from local server
 ...
 ### collect logs from home ssh server
+Should be easy with the Splunk Universal forwarder, as explained here https://ethicalhackingguru.com/put-splunk-universal-forwarder-on-raspberry-pi/ or here https://community.splunk.com/t5/Getting-Data-In/Universal-Forwarder-on-Raspberry-Pi/m-p/58046. However, seems it is no longer supported. I've tried the officall versions available  at https://www.splunk.com/en_us/download/universal-forwarder.html, but they seemed not to work. Splunk also details how to install, but the link does not work at all: https://www.splunk.com/en_us/blog/industries/how-to-splunk-data-from-a-raspberry-pi-three-easy-steps.html.
+So I've tried the solution with syslog. 
 ...
 #### Syslog receiver in Splunk
 ...
-#### Syslog sending in RPi
-...
+#### Syslog sending from RPi to Splunk
+Quite easy task.
+
+
 #### Dashboard in Splunk
 Created the new searches and saved to the RPI4 dashboard:
 * city of the IP of the invalid usernames: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City  | sort -count
@@ -86,8 +90,7 @@ And I was able to create a dashboard with ssh attacks to the RPi:
 ...
 
 ##  5th iteration - reduce ssh attacks with fail2ban
-fail2ban is a simple tool that reads the 
-
+fail2ban is a simple tool that by analyzing logs, discovers repeated failed authentication attempts and automatically sets firewall rules to drop traffic originating from the offender’s IP address.
 More info here: https://blog.swmansion.com/limiting-failed-ssh-login-attempts-with-fail2ban-7da15a2313b
 ### fail2ban
 Install and use the default config: ```sudo apt install fail2ban```
