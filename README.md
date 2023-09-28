@@ -79,7 +79,7 @@ So I've tried the solution with syslog.
 Quite easy task, this is a good guide: https://rubysash.com/operating-system/linux/setup-rsyslog-client-forwarder-on-raspberry-pi/
 Install rsyslog, and configure the IP of splunk:
 ```
-sudo apt-get purge rsyslog
+sudo apt-get install rsyslog
 sudo nano /etc/rsyslog.conf
 ...
 auth,authpriv.*                 /var/log/auth.log
@@ -115,7 +115,28 @@ And I was able to create a dashboard with ssh attacks to the RPi:
 ![pict](splunk_dashboard_ssh_attacks_rpi4.jpg)
 
 ### collect logs from home web server
+The lightttpd logs are stored in /var/log/lighttpd/access.log.
+The logs have the data:
+```
+87.196.80.1 g0mesp1res.dynip.sapo.pt - [29/Sep/2023:00:38:49 +0100] "GET /phishing/jquery.min.js HTTP/1.1" 200 282766 "http://g0mesp1res.dynip.sapo.pt/phishing/phishing.html" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36"
+87.196.80.1 g0mesp1res.dynip.sapo.pt - [29/Sep/2023:00:38:49 +0100] "GET /phishing/favicon.ico HTTP/1.1" 404 341 "http://g0mesp1res.dynip.sapo.pt/phishing/phishing.html" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36"
+87.196.80.1 g0mesp1res.dynip.sapo.pt - [29/Sep/2023:00:38:53 +0100] "GET /stats/rf433.txt HTTP/1.1" 200 5959 "http://g0mesp1res.dynip.sapo.pt/" "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Mobile Safari/537.36"
+```
+The data may be useful:
+ * IP of the requestor
+ * destination
+ * errors / successes
+ * method
+ * requestor system
+
+Let's try to send it to splunk via syslog:
+```
+sudo nano /etc/rsyslog.conf
 ...
+lightttpd.*                 /var/log/lighttpd/access.log
+
+sudo systemctl restart rsyslog
+```
 
 ##  5th iteration - reduce ssh attacks with fail2ban
 fail2ban is a simple tool that by analyzing logs, discovers repeated failed authentication attempts and automatically sets firewall rules to drop traffic originating from the offender’s IP address.
@@ -150,3 +171,40 @@ Chain f2b-sshd (1 references)
    23  1740 REJECT     all  --  *      *       43.159.45.214        0.0.0.0/0            reject-with icmp-port-unreachable
 10615 1609K RETURN     all  --  *      *       0.0.0.0/0            0.0.0.0/0
 ```
+After a few days, I tried checking how many IPs were being rejected and the list was over 600:
+```
+sudo iptables -L -n -v | grep REJECT | wc -l
+653
+```
+
+## 6th iteration - remaining weaknesses
+...
+### Externally exposed nmap scan
+An initial step is to check what an external adversary can see when accessing my ISP router.
+```
+sudo nmap -sV <my server>
+PORT     STATE SERVICE     VERSION
+21/tcp   open  ftp         D-Link/Comtrend DSL modem ftp firmware update
+22/tcp   open  ssh         Dropbear sshd 2017.75 (protocol 2.0)
+23/tcp   open  telnet
+80/tcp   open  http        lighttpd 1.4.53
+139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+443/tcp  open  tcpwrapped
+445/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+1883/tcp open  mqtt
+2222/tcp open  ssh         OpenSSH 7.9p1 Raspbian 10+deb10u2+rpt1 (protocol 2.0)
+5060/tcp open  sip         PTInS GR241AG Build 3RGW040C01r003 (Status: 404 Not Found)
+8080/tcp open  http-proxy?
+8089/tcp open  unknown
+9876/tcp open  sd?
+9877/tcp open  unknown
+```
+##### ftp, ssh, telnet, ...  open?
+This is the router itself, as configured by my ISP. Is it well protected?
+#### 2222/tcp open  ssh         OpenSSH 7.9p1 Raspbian 10+deb10u2+rpt1 (protocol 2.0)
+This is the port forwarding to my raspberry ssh server. How secure is it? Do I need it? Maybe better close it!
+#### 80/tcp   open  http        lighttpd 1.4.53
+This is the port forwarding to my raspberry web server. How secure is it? Maybe I should make some effort and use only https
+#### 1883/tcp open  mqtt
+This is the port forwarding to my mosquitto server. How secure is it? How can I improve its security
+
