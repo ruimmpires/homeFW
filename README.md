@@ -19,7 +19,7 @@ This wiretap is not compatible with gigabit, but up to the moment the switches a
 ### Suricata
 ...
 ### Results
-...
+```
 (rpires㉿kali)-[~]
 └─$ systemctl status suricata.service
 
@@ -44,7 +44,7 @@ This wiretap is not compatible with gigabit, but up to the moment the switches a
 11/08/2023-19:43:31.043564  [**] [1:2402000:6769] ET DROP Dshield Block Listed Source group 1 [**] [Classification: Misc Attack] [Priority: 2] {TCP} 198.235.24.83:54461 -> 192.168.1.201:80
 11/08/2023-23:41:58.601695  [**] [1:2400000:3747] ET DROP Spamhaus DROP Listed Traffic Inbound group 1 [**] [Classification: Misc Attack] [Priority: 2] {TCP} 31.41.244.62:42446 -> 192.168.1.201:22
 11/09/2023-00:03:19.563792  [**] [1:2001219:20] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 20.228.150.123:50336 -> 192.168.1.201:22
-...
+```
 ### Next
 The data from Suricata must be available for logging and analysis. As a wishlist, the attackers should somehow be banned. How to do it?
 The below example is one IP logging frequently.
