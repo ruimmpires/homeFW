@@ -14,7 +14,7 @@ I've created the wire tap as described in the following diagram.
 ![pic](wiretap_diagram.png)
 The end result is as in the pictures:
 ![pic](wiretap_pics.png)
-This wiretap is not compatible with gigabit, but up to the moment the switches and APs are limited to 100Mbps ehternet ports.
+This wiretap is not compatible with gigabit, but up to the moment my switches and APs have ethernet ports limited to 100Mbps, so not an immediate issue.
 
 ### Suricata
 ...
