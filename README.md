@@ -47,6 +47,8 @@ This wiretap is not compatible with gigabit, but up to the moment the switches a
 ...
 ### Next
 The data from Suricata must be available for logging and analysis. As a wishlist, the attackers should somehow be banned. How to do it?
+The below example is one IP logging frequently.
+![pic](example_abuse_IP.png)
 
 ## 2nd iteration - DNS filtering with Pi-Hole
 This iteration of the project holds several parts:
