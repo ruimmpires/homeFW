@@ -1,5 +1,8 @@
 # homeFW
-Home FW is a project that may be subject to several iteractions
+Home FW is a project that may be subject to several iteractions.
+The target architecture is described in the following diagram:
+![pic](target_architecture.png)
+The IPTV box is directly connected to the ISP router and everything else shall go through a firewall. After the firewall there will be a wiretap to an HIDS, and the traffic shall go transparently to the LAN switch.
 
 ## 1st iteration - RJ45 wire tap connected to a computer
 This iteration of the project  holds several parts:
@@ -7,15 +10,43 @@ This iteration of the project  holds several parts:
 * Suricata
 
 ### RJ 45 Wire tap
+I've created the wire tap as described in the following diagram.
+![pic](wiretap_diagram.png)
+The end result is as in the pictures:
+![pic](wiretap_pics.png)
+This wiretap is not compatible with gigabit, but up to the moment the switches and APs are limited to 100Mbps ehternet ports.
 
 ### Suricata
-
+...
 ### Results
 ...
-#### Good
+(rpires㉿kali)-[~]
+└─$ systemctl status suricata.service
+
+● suricata.service - Suricata IDS/IDP daemon
+     Loaded: loaded (/lib/systemd/system/suricata.service; enabled; preset: disabled)
+     Active: active (running) since Wed 2023-11-08 19:06:57 GMT; 9s ago
+       Docs: man:suricata(8)
+             man:suricatasc(8)
+             https://suricata-ids.org/docs/
+    Process: 2887556 ExecStart=/usr/bin/suricata -D --af-packet -c /etc/suricata/suricata.yaml --pidfile /run/suricata.pid (code=exited, status=0/SUCCESS)
+   Main PID: 2887557 (Suricata-Main)
+      Tasks: 1 (limit: 14097)
+     Memory: 297.4M
+        CPU: 9.913s
+     CGroup: /system.slice/suricata.service
+             └─2887557 /usr/bin/suricata -D --af-packet -c /etc/suricata/suricata.yaml --pidfile /run/suricata.pid
+                                                                                                                                                                                       
+┌──(rpires㉿kali)-[~]
+└─$ tail -f  /var/log/suricata/fast.log
+11/08/2023-19:38:21.955683  [**] [1:2400000:3747] ET DROP Spamhaus DROP Listed Traffic Inbound group 1 [**] [Classification: Misc Attack] [Priority: 2] {TCP} 31.41.244.61:62034 -> 192.168.1.201:22
+11/08/2023-19:38:21.955683  [**] [1:2525029:827] ET 3CORESec Poor Reputation IP group 30 [**] [Classification: Misc Attack] [Priority: 2] {TCP} 31.41.244.61:62034 -> 192.168.1.201:22
+11/08/2023-19:43:31.043564  [**] [1:2402000:6769] ET DROP Dshield Block Listed Source group 1 [**] [Classification: Misc Attack] [Priority: 2] {TCP} 198.235.24.83:54461 -> 192.168.1.201:80
+11/08/2023-23:41:58.601695  [**] [1:2400000:3747] ET DROP Spamhaus DROP Listed Traffic Inbound group 1 [**] [Classification: Misc Attack] [Priority: 2] {TCP} 31.41.244.62:42446 -> 192.168.1.201:22
+11/09/2023-00:03:19.563792  [**] [1:2001219:20] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 20.228.150.123:50336 -> 192.168.1.201:22
 ...
-#### Bad
-...
+### Next
+The data from Suricata must be available for logging and analysis. As a wishlist, the attackers should somehow be banned. How to do it?
 
 ## 2nd iteration - DNS filtering with Pi-Hole
 This iteration of the project holds several parts:
@@ -179,7 +210,8 @@ sudo iptables -L -n -v | grep REJECT | wc -l
 ```
 
 ## 6th iteration - remaining weaknesses
-...
+One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
+
 ### Externally exposed nmap scan
 An initial step is to check what an external adversary can see when accessing my ISP router.
 ```
