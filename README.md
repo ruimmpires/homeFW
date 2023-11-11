@@ -2,6 +2,7 @@
 Home FW is a project that may be subject to several iteractions.
 The target architecture is described in the following diagram:
 ![pic](target_architecture.png)
+
 The IPTV box is directly connected to the ISP router and everything else shall go through a firewall. After the firewall there will be a wiretap to an HIDS, and the traffic shall go transparently to the LAN switch.
 
 ## 1st iteration - RJ45 wire tap connected to a computer
@@ -12,8 +13,10 @@ This iteration of the project  holds several parts:
 ### RJ 45 Wire tap
 I've created the wire tap as described in the following diagram.
 ![pic](wiretap_diagram.png)
+
 The end result is as in the pictures:
 ![pic](wiretap_pics.png)
+
 This wiretap is not compatible with gigabit, but up to the moment my switches and APs have ethernet ports limited to 100Mbps, so not an immediate issue.
 
 ### Suricata
