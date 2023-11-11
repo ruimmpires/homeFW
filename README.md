@@ -5,6 +5,15 @@ The target architecture is described in the following diagram:
 
 The IPTV box is directly connected to the ISP router and everything else shall go through a firewall. After the firewall there will be a wiretap to an HIDS, and the traffic shall go transparently to the LAN switch.
 
+In my LAN I have 3 main services with port forwarding defined in the ISP router:
+* a Web server, running in a raspberry PI
+* a SSH server, also running in the same raspberry PI
+* a MQTT server, also running in the same raspberry PI
+I also have a Kali machine collecting some logs, that I will describe along this doc. I hope to later move this the same raspberry Pi, or other one.
+
+So, the current status is as described in the following pic:
+![pic](solution.png)
+
 ## 1st iteration - RJ45 wire tap connected to a computer
 This iteration of the project  holds several parts:
 * RJ 45 Wire tap
@@ -20,10 +29,23 @@ The end result is as in the pictures:
 This wiretap is not compatible with gigabit, but up to the moment my switches and APs have ethernet ports limited to 100Mbps, so not an immediate issue.
 
 ### Suricata
-...
-### Results
-I am only interested in the incoming packets, but for the sake of testing, 
+https://suricata.io/ is a  high performance, open source network analysis and threat detection software used by most private and public organizations, and embedded by major vendors to protect their assets.
+Suricata has a package ready to install and runs as a service.
+$sudo systemctl start suricata
+I’ve installed, copied the rules (some tweaks needed) and tweaked the configuration in:
+/etc/suricata/suricata.yaml
+The logs are similar:
+$/var/log/suricata/fast.log
 
+#### Testing
+curl -A "BlackSun" www.google.com
+curl -A Blacksun http://example.com 
+curl https://testmyids.com
+-> In this test I reverted the dip-switch to the outbound but cań't see any result!
+
+### Results
+I am only interested in the incoming packets, so the dip-switch is always in the inbound position.
+The below lines are an excerpt of a few minutes of operation.
 ```
 (rpires㉿kali)-[~]
 └─$ systemctl status suricata.service
