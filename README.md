@@ -22,6 +22,8 @@ This wiretap is not compatible with gigabit, but up to the moment my switches an
 ### Suricata
 ...
 ### Results
+I am only interested in the incoming packets, but for the sake of testing, 
+
 ```
 (rpires㉿kali)-[~]
 └─$ systemctl status suricata.service
