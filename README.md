@@ -10,6 +10,11 @@ In my LAN I have 3 main services with port forwarding defined in the ISP router:
 * a SSH server, also running in the same raspberry PI
 * a MQTT server, also running in the same raspberry PI
 I also have a Kali machine collecting some logs, that I will describe along this doc. I hope to later move this the same raspberry Pi, or other one.
+```sudo lsof -i -P -n | grep LISTEN
+mosquitto   606   mosquitto    5u  IPv4    19220      0t0  TCP *:1883 (LISTEN)
+pihole-FT   647      pihole    7u  IPv4    50260      0t0  TCP *:53 (LISTEN)
+lighttpd    968    www-data    4u  IPv4    21845      0t0  TCP *:80 (LISTEN)
+```
 
 So, the current status is as described in the following pic:
 ![pic](solution.png)
@@ -31,11 +36,11 @@ This wiretap is not compatible with gigabit, but up to the moment my switches an
 ### Suricata
 https://suricata.io/ is a  high performance, open source network analysis and threat detection software used by most private and public organizations, and embedded by major vendors to protect their assets.
 Suricata has a package ready to install and runs as a service.
-$sudo systemctl start suricata
+```sudo systemctl start suricata```
 I’ve installed, copied the rules (some tweaks needed) and tweaked the configuration in:
-/etc/suricata/suricata.yaml
-The logs are similar:
-$/var/log/suricata/fast.log
+```/etc/suricata/suricata.yaml```
+The logs are in e.g.:
+```/var/log/suricata/fast.log```
 
 #### Testing
 curl -A "BlackSun" www.google.com
@@ -83,15 +88,32 @@ This iteration of the project holds several parts:
 * Configure DNS in the home APs
 
 ### PiHole
-...
+Installed from https://pi-hole.net/.
+```git clone --depth 1 https://github.com/pi-hole/pi-hole.git Pi-hole
+cd "Pi-hole/automated install/"
+sudo bash basic-install.sh
+```
+change password with pihole -a -p
+
+I've stopped apache2 and so all services are now on lightppd.
+Pihole now listens udp/53 and has a service in tcp/80.
+```sudo lsof -i -P -n | grep LISTEN
+lighttpd    968    www-data    4u  IPv4    21845      0t0  TCP *:80 (LISTEN)
+
+pihole status
+  [✓] FTL is listening on port 53
+     [✓] UDP (IPv4)
+     [✓] TCP (IPv4)
+     [✓] UDP (IPv6)
+     [✓] TCP (IPv6)
+
+  [✓] Pi-hole blocking is enabled
+```
+Pihole provides a useful dashboard;
+![pic](pihole1.png)
 ### configuring DNS
-...
-### Results
-...
-#### Good
-...
-#### Bad
-...
+Leaved it uo to google and made sure the Pihole would only answer to internal requests. This DNS server does not reply to external queries which would make it part of some DDoS attack.
+![pic](pihole2.png)
 
 ## 3rd iteration - Detect Wifi attacks with Kismet
 This iteration of the project is just about installing Kismet
