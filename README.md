@@ -11,10 +11,12 @@ In my LAN I have 3 main services with port forwarding defined in the ISP router:
 * a MQTT server, also running in the same raspberry PI
 I also have a Kali machine collecting some logs, that I will describe along this doc. I hope to later move this the same raspberry Pi, or other one.
 ```sudo lsof -i -P -n | grep LISTEN
+sshd        689        root    3u  IPv4    19214      0t0  TCP *:22 (LISTEN)
 mosquitto   606   mosquitto    5u  IPv4    19220      0t0  TCP *:1883 (LISTEN)
 pihole-FT   647      pihole    7u  IPv4    50260      0t0  TCP *:53 (LISTEN)
 lighttpd    968    www-data    4u  IPv4    21845      0t0  TCP *:80 (LISTEN)
 ```
+Note, the DNS service is internal only, not included  in the router port-forwarding.
 
 So, the current status is as described in the following pic:
 ![pic](solution.png)
@@ -116,7 +118,7 @@ Leaved it uo to google and made sure the Pihole would only answer to internal re
 ![pic](pihole2.png)
 
 ## 3rd iteration - Detect Wifi attacks with Kismet
-This iteration of the project is just about installing Kismet
+This iteration of the project is just about installing Kismet.
 ### Kismet
 ...
 ### Results
