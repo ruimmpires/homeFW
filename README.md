@@ -114,13 +114,39 @@ pihole status
 Pihole provides a useful dashboard;
 ![pic](pihole1.png)
 ### configuring DNS
-Leaved it uo to google and made sure the Pihole would only answer to internal requests. This DNS server does not reply to external queries which would make it part of some DDoS attack.
+Leaved it up to google and made sure the Pihole would only answer to internal requests. This DNS server does not reply to external queries which would make it part of some DDoS attack.
 ![pic](pihole2.png)
 
 ## 3rd iteration - Detect Wifi attacks with Kismet
 This iteration of the project is just about installing Kismet.
 ### Kismet
-...
+...missing installation notes
+
+start the service with 
+```
+systemctl start kismet.
+Nov 12 22:27:35 kali kismet[430726]: INFO: Opened kismetdb log file './/Kismet-20231112-22-27-35-1.kismet'
+```
+Open the GUI with http://localhost:2501/ and select and enable the source. I've used one additional usb wifi adapter:
+
+![pic](kismet1.png)
+![pic](kismet2.png)
+
+Logs are configure at /etc/kismet/kismet_logging.conf
+```
+tail -f /Kismet-20231112-22-27-35-1.kismet 
+K?IEEE802.11AC:15:A2:95:57:D3FF:FF:FF:FF:FF:FF00:00:00:00:00:00$??0p?5FE308BD-0000-0000-0000-38A28C90606C.Hl    ?b????????/????W???=`/b&W?????V?d{?|?=#?        ?d????[?@x?z5???
+eQT??G  ?Q??s?R=?*??BUD///
+```
+This is not a readable format but rather a format for SQL, explained here https://www.kismetwireless.net/docs/readme/logging/logging/
+Notice these logs grow to hundred of MB per day.
+
+The objectives are to get similar info in log as to what we have in the GUI, and thus create some dashboards and alerts with:
+* list of visible SSIDs
+* list of devices
+* list of alerts
+
+
 ### Results
 ...
 #### Good
