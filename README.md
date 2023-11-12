@@ -132,7 +132,13 @@ Open the GUI with http://localhost:2501/ and select and enable the source. I've 
 ![pic](kismet1.png)
 ![pic](kismet2.png)
 
-Logs are configure at /etc/kismet/kismet_logging.conf
+Logs are configured at /etc/kismet/kismet_logging.conf
+```
+enable_logging=true
+log_prefix=/tmp
+log_types=kismet,wiglecsv
+```
+
 ```
 tail -f /Kismet-20231112-22-27-35-1.kismet 
 K?IEEE802.11AC:15:A2:95:57:D3FF:FF:FF:FF:FF:FF00:00:00:00:00:00$??0p?5FE308BD-0000-0000-0000-38A28C90606C.Hl    ?b????????/????W???=`/b&W?????V?d{?|?=#?        ?d????[?@x?z5???
@@ -140,6 +146,14 @@ eQT??G  ?Q??s?R=?*??BUD///
 ```
 This is not a readable format but rather a format for SQL, explained here https://www.kismetwireless.net/docs/readme/logging/logging/
 Notice these logs grow to hundred of MB per day.
+
+This log seems to do not get any data.
+```
+tail -f Kismet-20231112-23-05-34-1.wiglecsv
+WigleWifi-1.4,appRelease=Kismet202208R1,model=Kismet,release=2022.08.R1,device=kismet,display=kismet,board=kismet,brand=kismet
+MAC,SSID,AuthMode,FirstSeen,Channel,RSSI,CurrentLatitude,CurrentLongitude,AltitudeMeters,AccuracyMeters,Type
+```
+
 
 The objectives are to get similar info in log as to what we have in the GUI, and thus create some dashboards and alerts with:
 * list of visible SSIDs
