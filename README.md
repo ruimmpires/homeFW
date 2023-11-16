@@ -176,9 +176,10 @@ This iteration of the project holds several parts:
 * push alarms to Slack
 * push alarms to MQTT
 * collect logs from home web server
-### Splunk
-...
-### Splunk to Slack
+### install Splunk
+Easy to install in my Kali linux, just followed the link https://docs.splunk.com/Documentation/Splunk/9.1.1/SearchTutorial/InstallSplunk#Linux_installation_instructions and then start the application with ```sudo /opt/splunk/bin/splunk start```. The web application gets available in http://localhost:8000/.
+
+### Push Splunk alarms to Slack
 ...
 In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
 ![pic](suricata_alarm_config_1.png)
@@ -229,7 +230,6 @@ listening on any, link-type LINUX_SLL (Linux cooked), capture size 262144 bytes
 # test message
 logger -p daemon.emerg "DANGER WILL ROBINSON!!!"
 ```
-
 #### Dashboard in Splunk
 Created the new searches and saved to the RPI4 dashboard:
 * city of the IP of the invalid usernames: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City  | sort -count
@@ -262,6 +262,25 @@ lightttpd.*                 /var/log/lighttpd/access.log
 
 sudo systemctl restart rsyslog
 ```
+### Splunk not working anymore as the free license is not enough for all use cases:**
+```Error in 'rtlitsearch' command: Your Splunk license expired or you have exceeded your license limit too many times. Renew your Splunk license by visiting www.splunk.com/store or calling 866.GET.SPLUNK```
+![pict](splunk_licensing_notification.png)
+
+So, I've change the licanse to the free license, and restarted splunk.
+![pict](splunk_licensing_change.png)
+
+Then found that the indexers are indexing too fast and getting too big. In http://192.168.1.151:8000/en-US/manager/search/data/indexes confirmed the main db was at 4.58GB after 2 months.
+Copied the default indexer from /opt/splunk/etc/system/default/indexes.conf to /opt/splunk/etc/system/local/indexes.conf  and reduced some parameters:
+- maxTotalDataSizeMB = 5000
+
+Again restarted splunk with ```sudo /opt/splunk/bin/splunk restart```. When going back to http://192.168.1.151:8000/en-US/manager/search/data/indexes, I could confirme the Maz Size at 4.88GB.
+
+Now, to check what am I abusing, looked into http://192.168.1.151:8000/en-US/manager/search/licenseusage. I notice solunk was collecting 150MB of data daily, under the 500MB free license daily limit as stated in http://192.168.1.151:8000/en-US/manager/search/licenseusage.
+
+
+
+### Splunk unisntall and reinstall with free license
+
 
 ##  5th iteration - reduce ssh attacks with fail2ban
 fail2ban is a simple tool that by analyzing logs, discovers repeated failed authentication attempts and automatically sets firewall rules to drop traffic originating from the offender’s IP address.
