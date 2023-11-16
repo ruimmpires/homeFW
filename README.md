@@ -232,9 +232,9 @@ logger -p daemon.emerg "DANGER WILL ROBINSON!!!"
 ```
 #### Dashboard in Splunk
 Created the new searches and saved to the RPI4 dashboard:
-* city of the IP of the invalid usernames: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City  | sort -count
-* invalid usernames: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>ipv4)"  | rex "(Invalid user )(?<InvUser>\w+)" | stats count by InvUser | sort -count
-* failed authentiction: source="tcp:514" "authentication failure" "user=" | rex "(user=)(?<UnauthUser>\w+)" | stats count by UnauthUser | sort -count
+* RPI4 SSH auth failures per day: source="tcp:514" "authentication failure" "user=" | timechart count
+* RPI4 SSH invalid users per Country last week: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by Country | sort - count
+* RPI4 SSH invalid users per city last day: * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 And I was able to create a dashboard with ssh attacks to the RPi:
 ![pict](splunk_dashboard_ssh_attacks_rpi4.jpg)
 
