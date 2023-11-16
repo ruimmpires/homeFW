@@ -120,9 +120,9 @@ Leaved it up to google and made sure the Pihole would only answer to internal re
 ## 3rd iteration - Detect Wifi attacks with Kismet
 This iteration of the project is just about installing Kismet.
 ### Kismet
-...missing installation notes
+As easy as installing the interface libs, and clone from git, as described in https://www.kismetwireless.net/docs/readme/installing/linux/
 
-start the service with 
+Start the service with 
 ```
 systemctl start kismet.
 Nov 12 22:27:35 kali kismet[430726]: INFO: Opened kismetdb log file './/Kismet-20231112-22-27-35-1.kismet'
@@ -161,13 +161,6 @@ The objectives are to get similar info in log as to what we have in the GUI, and
 * list of alerts
 
 
-### Results
-...
-#### Good
-...
-#### Bad
-...
-
 ## 4th iteration - collect logs into Splunk
 This iteration of the project holds several parts:
 * install Splunk
@@ -187,19 +180,26 @@ I got the scheduled alarms in my Slack for mobile:
 ![pic](splunk_to_slack_alarm_mobile_1.png).
 
 However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
-
+**Not working anymore as the trial licensed expired.**
 ...
 ### Splunk to MQTT
-...
+**Not possible anymore as the trial licensed expired.**
+
 ### collect logs from local server
-...
+ongoing
+
 ### collect logs from home ssh server
 Should be easy with the Splunk Universal forwarder, as explained here https://ethicalhackingguru.com/put-splunk-universal-forwarder-on-raspberry-pi/ or here https://community.splunk.com/t5/Getting-Data-In/Universal-Forwarder-on-Raspberry-Pi/m-p/58046. However, seems it is no longer supported. I've tried the officall versions available  at https://www.splunk.com/en_us/download/universal-forwarder.html, but they seemed not to work. Splunk also details how to install, but the link does not work at all: https://www.splunk.com/en_us/blog/industries/how-to-splunk-data-from-a-raspberry-pi-three-easy-steps.html.
 
 So I've tried the solution with syslog. 
 
 #### Syslog receiver in Splunk
-...
+Configured here: http://192.168.1.151:8000/en-US/manager/search/data/inputs/tcp/raw
+TCP port	     514	
+Source type	linux_messages_syslog
+
+http://192.168.1.151:8000/en-US/manager/search/data/inputs/monitor
+
 #### Syslog sending from RPi to Splunk
 Quite easy task, this is a good guide: https://rubysash.com/operating-system/linux/setup-rsyslog-client-forwarder-on-raspberry-pi/
 Install rsyslog, and configure the IP of splunk:
@@ -233,10 +233,13 @@ logger -p daemon.emerg "DANGER WILL ROBINSON!!!"
 #### Dashboard in Splunk
 Created the new searches and saved to the RPI4 dashboard:
 * RPI4 SSH auth failures per day: source="tcp:514" "authentication failure" "user=" | timechart count
+* RPI4 SSH auth failures username: source="tcp:514" "authentication failure" "user=" | rex "(user=)(?<UnauthUser>\w+)" | stats count by UnauthUser | sort -count
+* RPI4 SSH invalid users per day: source="tcp:514" "Invalid user" | timechart count
 * RPI4 SSH invalid users per Country last week: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by Country | sort - count
 * RPI4 SSH invalid users per city last day: * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 And I was able to create a dashboard with ssh attacks to the RPi:
 ![pict](splunk_dashboard_ssh_attacks_rpi4.jpg)
+![pict](splunk_dashboard_rpi4.png)
 
 ### collect logs from home web server
 The lightttpd logs are stored in /var/log/lighttpd/access.log.
@@ -318,6 +321,8 @@ After a few days, I tried checking how many IPs were being rejected and the list
 sudo iptables -L -n -v | grep REJECT | wc -l
 653
 ```
+However, the impacts in SHS logging is huge: the ammount of SSH rejections reduced from 20k to under 500 per day:
+![pict](fail2ban_impact.jpg)
 
 ## 6th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
