@@ -266,7 +266,7 @@ sudo systemctl restart rsyslog
 ```Error in 'rtlitsearch' command: Your Splunk license expired or you have exceeded your license limit too many times. Renew your Splunk license by visiting www.splunk.com/store or calling 866.GET.SPLUNK```
 ![pict](splunk_licensing_notification.png)
 
-So, I've change the licanse to the free license, and restarted splunk.
+So, I've changed the license to the free license, and restarted splunk.
 ![pict](splunk_licensing_change.png)
 
 Then found that the indexers are indexing too fast and getting too big. In http://192.168.1.151:8000/en-US/manager/search/data/indexes confirmed the main db was at 4.58GB after 2 months.
@@ -275,11 +275,9 @@ Copied the default indexer from /opt/splunk/etc/system/default/indexes.conf to /
 
 Again restarted splunk with ```sudo /opt/splunk/bin/splunk restart```. When going back to http://192.168.1.151:8000/en-US/manager/search/data/indexes, I could confirme the Maz Size at 4.88GB.
 
-Now, to check what am I abusing, looked into http://192.168.1.151:8000/en-US/manager/search/licenseusage. I notice solunk was collecting 150MB of data daily, under the 500MB free license daily limit as stated in http://192.168.1.151:8000/en-US/manager/search/licenseusage.
+Now, to check what am I abusing, looked into http://192.168.1.151:8000/en-US/manager/search/licenseusage. I notice splunk is collecting 150MB of data daily, under the 500MB free license daily limit as stated in http://192.168.1.151:8000/en-US/manager/search/licenseusage. However there is this notification: ```1 pool warning reported by 1 indexer```.
 
 
-
-### Splunk unisntall and reinstall with free license
 
 
 ##  5th iteration - reduce ssh attacks with fail2ban
