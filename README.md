@@ -11,10 +11,10 @@ In my LAN I have 3 main services with port forwarding defined in the ISP router:
 * a MQTT server, also running in the same raspberry PI
 I also have a Kali machine collecting some logs, that I will describe along this doc. I hope to later move this the same raspberry Pi, or other one.
 ```sudo lsof -i -P -n | grep LISTEN
-sshd        689        root    3u  IPv4    19214      0t0  TCP *:22 (LISTEN)
-mosquitto   606   mosquitto    5u  IPv4    19220      0t0  TCP *:1883 (LISTEN)
-pihole-FT   647      pihole    7u  IPv4    50260      0t0  TCP *:53 (LISTEN)
-lighttpd    968    www-data    4u  IPv4    21845      0t0  TCP *:80 (LISTEN)
+sshd                root      IPv4    19214      0t0  TCP *:22 (LISTEN)
+mosquitto      mosquitto      IPv4    19220      0t0  TCP *:1883 (LISTEN)
+pihole-FT         pihole      IPv4    50260      0t0  TCP *:53 (LISTEN)
+lighttpd        www-data      IPv4    21845      0t0  TCP *:80 (LISTEN)
 ```
 Note, the DNS service is internal only, not included  in the router port-forwarding.
 
@@ -37,21 +37,25 @@ This wiretap is not compatible with gigabit, but up to the moment my switches an
 
 ### Suricata
 https://suricata.io/ is a  high performance, open source network analysis and threat detection software used by most private and public organizations, and embedded by major vendors to protect their assets.
-Suricata has a package ready to install and runs as a service.
+Suricata has a package ready to install and runs as a service:
 ```sudo systemctl start suricata```
+
 I’ve installed, copied the rules (some tweaks needed) and tweaked the configuration in:
 ```/etc/suricata/suricata.yaml```
+
 The logs are in e.g.:
 ```/var/log/suricata/fast.log```
 
 #### Testing
+```
 curl -A "BlackSun" www.google.com
 curl -A Blacksun http://example.com 
 curl https://testmyids.com
--> In this test I reverted the dip-switch to the outbound but cań't see any result!
+```
+note, in this test I reverted the dip-switch to the outbound but cań't see any result!
 
 ### Results
-I am only interested in the incoming packets, so the dip-switch is always in the inbound position.
+I am only interested in the packets coming from the Internet, so the dip-switch is always in the inbound position.
 The below lines are an excerpt of a few minutes of operation.
 ```
 (rpires㉿kali)-[~]
@@ -81,8 +85,10 @@ The below lines are an excerpt of a few minutes of operation.
 ```
 ### Next
 The data from Suricata must be available for logging and analysis. As a wishlist, the attackers should somehow be banned. How to do it?
-The below example is one IP logging frequently.
+The below example is one IP captured frequently.
 ![pic](example_abuse_IP.png)
+
+
 
 ## 2nd iteration - DNS filtering with Pi-Hole
 This iteration of the project holds several parts:
@@ -98,9 +104,9 @@ sudo bash basic-install.sh
 change password with pihole -a -p
 
 I've stopped apache2 and so all services are now on lightppd.
-Pihole now listens udp/53 and has a service in tcp/80.
+Pihole now listens to udp/53 and has a service in tcp/80.
 ```sudo lsof -i -P -n | grep LISTEN
-lighttpd    968    www-data    4u  IPv4    21845      0t0  TCP *:80 (LISTEN)
+lighttpd       www-data      IPv4    21845      0t0  TCP *:80 (LISTEN)
 
 pihole status
   [✓] FTL is listening on port 53
@@ -111,11 +117,14 @@ pihole status
 
   [✓] Pi-hole blocking is enabled
 ```
-Pihole provides a useful dashboard;
+Pihole provides a useful dashboard:
 ![pic](pihole1.png)
 ### configuring DNS
-Leaved it up to google and made sure the Pihole would only answer to internal requests. This DNS server does not reply to external queries which would make it part of some DDoS attack.
+Leaved it up to google and made sure the Pihole would only answer to internal requests. The DHCP servers running in my LAN now point to this PiHole as the DNS. 
+This DNS server does not reply to external queries which could be abused. If it woud be replying to external queries, it would be queried with spoofed source IPs, so it woud answer to the target of a DDoS victim.
 ![pic](pihole2.png)
+
+
 
 ## 3rd iteration - Detect Wifi attacks with Kismet
 This iteration of the project is just about installing Kismet.
@@ -161,6 +170,7 @@ The objectives are to get similar info in log as to what we have in the GUI, and
 * list of alerts
 
 
+
 ## 4th iteration - collect logs into Splunk
 This iteration of the project holds several parts:
 * install Splunk
@@ -169,24 +179,31 @@ This iteration of the project holds several parts:
 * push alarms to Slack
 * push alarms to MQTT
 * collect logs from home web server
+  
 ### install Splunk
 Easy to install in my Kali linux, just followed the link https://docs.splunk.com/Documentation/Splunk/9.1.1/SearchTutorial/InstallSplunk#Linux_installation_instructions and then start the application with ```sudo /opt/splunk/bin/splunk start```. The web application gets available in http://localhost:8000/.
 
 ### Push Splunk alarms to Slack
-...
 In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
 ![pic](suricata_alarm_config_1.png)
-I got the scheduled alarms in my Slack for mobile: 
+
+I scheduled alarms in my Slack for mobile: 
 ![pic](splunk_to_slack_alarm_mobile_1.png).
 
 However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
+
 **Not working anymore as the trial licensed expired.**
-...
+
 ### Splunk to MQTT
 **Not possible anymore as the trial licensed expired.**
 
-### collect logs from local server
-ongoing
+### collect logs from local machine
+**From Kali authentication:**
+KALI Invalid logins daily, last month: sourcetype=KaliAuthLog AND "invalid" | rex field=_raw "(?<clientip>[[ipv4]])" | timechart count
+
+**From Suricata:**
+SURICATA attacls per ports, last week: source="/var/log/suricata/fast.log" AND "Attack" | top limit=10 dest_port
+SURICATA attacks per IP, city and country, last month: source="/var/log/suricata/fast.log" AND "Attack" | stats count by src_ip  |iplocation src_ip | sort -count | table src_ip count City Country
 
 ### collect logs from home ssh server
 Should be easy with the Splunk Universal forwarder, as explained here https://ethicalhackingguru.com/put-splunk-universal-forwarder-on-raspberry-pi/ or here https://community.splunk.com/t5/Getting-Data-In/Universal-Forwarder-on-Raspberry-Pi/m-p/58046. However, seems it is no longer supported. I've tried the officall versions available  at https://www.splunk.com/en_us/download/universal-forwarder.html, but they seemed not to work. Splunk also details how to install, but the link does not work at all: https://www.splunk.com/en_us/blog/industries/how-to-splunk-data-from-a-raspberry-pi-three-easy-steps.html.
@@ -230,7 +247,7 @@ listening on any, link-type LINUX_SLL (Linux cooked), capture size 262144 bytes
 # test message
 logger -p daemon.emerg "DANGER WILL ROBINSON!!!"
 ```
-#### Dashboard in Splunk
+#### Dashboards in Splunk
 Created the new searches and saved to the RPI4 dashboard:
 * RPI4 SSH auth failures per day: source="tcp:514" "authentication failure" "user=" | timechart count
 * RPI4 SSH auth failures username: source="tcp:514" "authentication failure" "user=" | rex "(user=)(?<UnauthUser>\w+)" | stats count by UnauthUser | sort -count
@@ -238,7 +255,6 @@ Created the new searches and saved to the RPI4 dashboard:
 * RPI4 SSH invalid users per Country last week: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by Country | sort - count
 * RPI4 SSH invalid users per city last day: * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 And I was able to create a dashboard with ssh attacks to the RPi:
-![pict](splunk_dashboard_ssh_attacks_rpi4.jpg)
 ![pict](splunk_dashboard_rpi4.png)
 
 ### collect logs from home web server
