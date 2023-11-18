@@ -183,19 +183,6 @@ This iteration of the project holds several parts:
 ### install Splunk
 Easy to install in my Kali linux, just followed the link https://docs.splunk.com/Documentation/Splunk/9.1.1/SearchTutorial/InstallSplunk#Linux_installation_instructions and then start the application with ```sudo /opt/splunk/bin/splunk start```. The web application gets available in http://localhost:8000/.
 
-### Push Splunk alarms to Slack
-In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
-![pic](suricata_alarm_config_1.png)
-
-I scheduled alarms in my Slack for mobile: 
-![pic](splunk_to_slack_alarm_mobile_1.png).
-
-However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
-
-**Not working anymore as the trial licensed expired.**
-
-### Splunk to MQTT
-**Not possible anymore as the trial licensed expired.**
 
 ### collect logs from local machine
 **From Kali authentication:**
@@ -204,6 +191,9 @@ KALI Invalid logins daily, last month: sourcetype=KaliAuthLog AND "invalid" | re
 **From Suricata:**
 SURICATA attacls per ports, last week: source="/var/log/suricata/fast.log" AND "Attack" | top limit=10 dest_port
 SURICATA attacks per IP, city and country, last month: source="/var/log/suricata/fast.log" AND "Attack" | stats count by src_ip  |iplocation src_ip | sort -count | table src_ip count City Country
+SURICATA alert events, last week: source="/var/log/suricata/eve.json" AND "e" event_type=alert | timechart count
+SURICATA attacks per country in map, last month: source="/var/log/suricata/fast.log" AND "Attack" |iplocation src_ip | stats count by Country |geom geo_countries allFeatures=True featureIdField=Country
+SURICATA attacks per ports, time series, last week: source="/var/log/suricata/fast.log" AND "Attack" AND (dest_port=80 OR dest_port=22 OR dest_port=1883)  | timechart count by dest_port
 
 ### collect logs from home ssh server
 Should be easy with the Splunk Universal forwarder, as explained here https://ethicalhackingguru.com/put-splunk-universal-forwarder-on-raspberry-pi/ or here https://community.splunk.com/t5/Getting-Data-In/Universal-Forwarder-on-Raspberry-Pi/m-p/58046. However, seems it is no longer supported. I've tried the officall versions available  at https://www.splunk.com/en_us/download/universal-forwarder.html, but they seemed not to work. Splunk also details how to install, but the link does not work at all: https://www.splunk.com/en_us/blog/industries/how-to-splunk-data-from-a-raspberry-pi-three-easy-steps.html.
@@ -257,6 +247,9 @@ Created the new searches and saved to the RPI4 dashboard:
 And I was able to create a dashboard with ssh attacks to the RPi:
 ![pict](splunk_dashboard_rpi4.png)
 
+And this dashboard for Kali, with Suricata data:
+![pict](splunk_dashboard_kali.png)
+
 ### collect logs from home web server
 The lightttpd logs are stored in /var/log/lighttpd/access.log.
 The logs have the data:
@@ -281,6 +274,21 @@ lightttpd.*                 /var/log/lighttpd/access.log
 
 sudo systemctl restart rsyslog
 ```
+
+### Push Splunk alarms to Slack
+In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
+![pic](suricata_alarm_config_1.png)
+
+I scheduled alarms in my Slack for mobile: 
+![pic](splunk_to_slack_alarm_mobile_1.png).
+
+However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
+
+**Not working anymore as the trial licensed expired.**
+
+### Splunk to MQTT
+**Not possible anymore as the trial licensed expired.**
+
 ### Splunk not working anymore as the free license is not enough for all use cases:**
 ```Error in 'rtlitsearch' command: Your Splunk license expired or you have exceeded your license limit too many times. Renew your Splunk license by visiting www.splunk.com/store or calling 866.GET.SPLUNK```
 ![pict](splunk_licensing_notification.png)
