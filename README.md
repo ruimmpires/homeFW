@@ -185,6 +185,9 @@ Easy to install in my Kali linux, just followed the link https://docs.splunk.com
 
 
 ### collect logs from local machine
+Add the files to be monitored here: http://192.168.1.151:8000/en-US/manager/search/data/inputs/monitor
+![pict](splunk_files_directories.png)
+
 **From Kali authentication:**
 KALI Invalid logins daily, last month: sourcetype=KaliAuthLog AND "invalid" | rex field=_raw "(?<clientip>[[ipv4]])" | timechart count
 
