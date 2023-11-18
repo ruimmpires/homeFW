@@ -189,11 +189,11 @@ Easy to install in my Kali linux, just followed the link https://docs.splunk.com
 KALI Invalid logins daily, last month: sourcetype=KaliAuthLog AND "invalid" | rex field=_raw "(?<clientip>[[ipv4]])" | timechart count
 
 **From Suricata:**
-SURICATA attacls per ports, last week: source="/var/log/suricata/fast.log" AND "Attack" | top limit=10 dest_port
-SURICATA attacks per IP, city and country, last month: source="/var/log/suricata/fast.log" AND "Attack" | stats count by src_ip  |iplocation src_ip | sort -count | table src_ip count City Country
-SURICATA alert events, last week: source="/var/log/suricata/eve.json" AND "e" event_type=alert | timechart count
-SURICATA attacks per country in map, last month: source="/var/log/suricata/fast.log" AND "Attack" |iplocation src_ip | stats count by Country |geom geo_countries allFeatures=True featureIdField=Country
-SURICATA attacks per ports, time series, last week: source="/var/log/suricata/fast.log" AND "Attack" AND (dest_port=80 OR dest_port=22 OR dest_port=1883)  | timechart count by dest_port
+* SURICATA attacls per ports, last week: source="/var/log/suricata/fast.log" AND "Attack" | top limit=10 dest_port
+* SURICATA attacks per IP, city and country, last month: source="/var/log/suricata/fast.log" AND "Attack" | stats count by src_ip  |iplocation src_ip | sort -count | table src_ip count City Country
+* SURICATA alert events, last week: source="/var/log/suricata/eve.json" AND "e" event_type=alert | timechart count
+* SURICATA attacks per country in map, last month: source="/var/log/suricata/fast.log" AND "Attack" |iplocation src_ip | stats count by Country |geom geo_countries allFeatures=True featureIdField=Country
+* SURICATA attacks per ports, time series, last week: source="/var/log/suricata/fast.log" AND "Attack" AND (dest_port=80 OR dest_port=22 OR dest_port=1883)  | timechart count by dest_port
 
 ### collect logs from home ssh server
 Should be easy with the Splunk Universal forwarder, as explained here https://ethicalhackingguru.com/put-splunk-universal-forwarder-on-raspberry-pi/ or here https://community.splunk.com/t5/Getting-Data-In/Universal-Forwarder-on-Raspberry-Pi/m-p/58046. However, seems it is no longer supported. I've tried the officall versions available  at https://www.splunk.com/en_us/download/universal-forwarder.html, but they seemed not to work. Splunk also details how to install, but the link does not work at all: https://www.splunk.com/en_us/blog/industries/how-to-splunk-data-from-a-raspberry-pi-three-easy-steps.html.
