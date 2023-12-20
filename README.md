@@ -307,7 +307,11 @@ Again restarted splunk with ```sudo /opt/splunk/bin/splunk restart```. When goin
 
 Now, to check what am I abusing, looked into http://192.168.1.151:8000/en-US/manager/search/licenseusage. I notice splunk is collecting 150MB of data daily, under the 500MB free license daily limit as stated in http://192.168.1.151:8000/en-US/manager/search/licenseusage. However there is this notification: ```1 pool warning reported by 1 indexer```.
 
-
+### Collect logs from other Linux machines
+* Installed the Universal Splunk receiver from https://www.splunk.com/en_us/download/universal-forwarder.html
+* Used the wget option wget -O splunkforwarder-9.1.2-b6b9c8185839-linux-2.6-amd64.deb "https://download.splunk.com/products/universalforwarder/releases/9.1.2/linux/splunkforwarder-9.1.2-b6b9c8185839-linux-2.6-amd64.deb"
+* start the firwarder https://docs.splunk.com/Documentation/Forwarder/9.1.2/Forwarder/StartorStoptheuniversalforwarder
+* Configured the splunk to receive in port 9997, as explained here https://docs.splunk.com/Documentation/Forwarder/8.2.6/Forwarder/Enableareceiver 
 
 
 ##  5th iteration - reduce ssh attacks with fail2ban
