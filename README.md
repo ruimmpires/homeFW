@@ -355,6 +355,18 @@ sudo iptables -L -n -v | grep REJECT | wc -l
 However, the impacts in SHS logging is huge: the ammount of SSH rejections reduced from 20k to under 500 per day:
 ![pict](fail2ban_impact.jpg)
 
+Note:
+configure  /etc/fail2ban/jail.local with 
+```
+[sshd]
+#Set ban time to 5 minutes
+bantime = 300
+#Decrease the number of failed login attempts before banning to 3
+maxretry=3
+```
+After changing the configuration remember to restart the service:
+sudo systemctl restart fail2ban
+
 ## 6th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
 
