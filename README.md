@@ -240,6 +240,7 @@ listening on any, link-type LINUX_SLL (Linux cooked), capture size 262144 bytes
 # test message
 logger -p daemon.emerg "DANGER WILL ROBINSON!!!"
 ```
+
 #### Dashboards in Splunk
 Created the new searches and saved to the RPI4 dashboard:
 * RPI4 SSH auth failures per day: source="tcp:514" "authentication failure" "user=" | timechart count
@@ -313,6 +314,35 @@ Now, to check what am I abusing, looked into http://192.168.1.151:8000/en-US/man
 * start the firwarder https://docs.splunk.com/Documentation/Forwarder/9.1.2/Forwarder/StartorStoptheuniversalforwarder
 * Configured the splunk to receive in port 9997, as explained here https://docs.splunk.com/Documentation/Forwarder/8.2.6/Forwarder/Enableareceiver 
 
+Not happy with the above, I created a script to collect CPU, MEM and HDD, and sent it via syslog:
+systemstats.sh
+```
+echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM= `free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}'`"
+```
+
+sudo nano /etc/rsyslog.d/systemstats.conf
+```
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/home/rpires/systemstats.log"
+      Tag="systemstats"
+      Facility="local0")
+```
+
+crontab -e
+```
+*/1 * * * * sh /home/rpires/systemstats.sh >> /home/rpires/systemstats.log
+```
+
+sudo nano /etc/rsyslog.conf
+```
+*.* @@192.168.1.200
+```
+
+Splunk:
+```
+source="tcp:514" "systemstats DATE" host=rpi2 | timechart avg(CPU) avg(RAM) avg(HDD)
+```
 
 ##  5th iteration - reduce ssh attacks with fail2ban
 fail2ban is a simple tool that by analyzing logs, discovers repeated failed authentication attempts and automatically sets firewall rules to drop traffic originating from the offender’s IP address.
@@ -366,6 +396,39 @@ maxretry=3
 ```
 After changing the configuration remember to restart the service:
 sudo systemctl restart fail2ban
+
+
+Additionally, added the number of lines to splunk with:
+f2b_line_count.sh
+```
+echo "DATE=`date -u +"%Y.%m.%d %T"`, IPTABLES=$(sudo iptables -L -n -v | grep REJECT | wc -l)"
+```
+
+sudo nano /etc/rsyslog.d/f2b_line_count.conf
+```
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/home/rpires/f2b_line_count.log"
+      Tag="f2b_line_count"
+      Facility="local0")
+```
+
+sudo crontab -e
+```
+*/1 * * * * sh /home/rpires/f2b_line_count.sh >> /home/rpires/f2b_line_count.log
+```
+
+sudo nano /etc/rsyslog.conf
+```
+*.* @@192.168.1.200
+```
+
+sudo systemctl restart rsyslog.service
+
+Splunk:
+```
+source="tcp:514" "f2b_line_count DATE" host=rpi2 | timechart avg(IPTABLES)
+```
 
 ## 6th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
