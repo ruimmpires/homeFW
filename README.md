@@ -314,7 +314,7 @@ Now, to check what am I abusing, looked into http://192.168.1.151:8000/en-US/man
 * start the firwarder https://docs.splunk.com/Documentation/Forwarder/9.1.2/Forwarder/StartorStoptheuniversalforwarder
 * Configured the splunk to receive in port 9997, as explained here https://docs.splunk.com/Documentation/Forwarder/8.2.6/Forwarder/Enableareceiver 
 
-Not happy with the above, I created a script to collect CPU, MEM and HDD, and sent it via syslog:
+Not happy with the above, I created a script to collect CPU, MEM and HDD, and sent it via syslog. The initial script was not good, but Rodrigo helped and simplified in one single line:
 systemstats.sh
 ```
 echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM= `free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}'`"
@@ -343,6 +343,7 @@ Splunk:
 ```
 source="tcp:514" "systemstats DATE" host=rpi2 | timechart avg(CPU) avg(RAM) avg(HDD)
 ```
+**Note: the CPU of RaspberryPi 2 gets to 100% everytime the crontab runs.**
 
 ##  5th iteration - reduce ssh attacks with fail2ban
 fail2ban is a simple tool that by analyzing logs, discovers repeated failed authentication attempts and automatically sets firewall rules to drop traffic originating from the offender’s IP address.
