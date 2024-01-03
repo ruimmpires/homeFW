@@ -19,6 +19,7 @@ lighttpd        www-data      IPv4    21845      0t0  TCP *:80 (LISTEN)
 Note, the DNS service is internal only, not included  in the router port-forwarding.
 
 So, the current status is as described in the following pic:
+
 ![pic](solution.png)
 
 ## 1st iteration - RJ45 wire tap connected to a computer
@@ -28,9 +29,11 @@ This iteration of the project  holds several parts:
 
 ### RJ 45 Wire tap
 I've created the wire tap as described in the following diagram.
+
 ![pic](wiretap_diagram.png)
 
 The end result is as in the pictures:
+
 ![pic](wiretap_pics.png)
 
 This wiretap is not compatible with gigabit, but up to the moment my switches and APs have ethernet ports limited to 100Mbps, so not an immediate issue.
@@ -86,6 +89,7 @@ The below lines are an excerpt of a few minutes of operation.
 ### Next
 The data from Suricata must be available for logging and analysis. As a wishlist, the attackers should somehow be banned. How to do it?
 The below example is one IP captured frequently.
+
 ![pic](example_abuse_IP.png)
 
 
@@ -118,6 +122,7 @@ pihole status
   [✓] Pi-hole blocking is enabled
 ```
 Pihole provides a useful dashboard:
+
 ![pic](pihole1.png)
 ### configuring DNS
 Leaved it up to google and made sure the Pihole would only answer to internal requests. The DHCP servers running in my LAN now point to this PiHole as the DNS. 
@@ -186,6 +191,7 @@ Easy to install in my Kali linux, just followed the link https://docs.splunk.com
 
 ### collect logs from local machine
 Add the files to be monitored here: http://192.168.1.151:8000/en-US/manager/search/data/inputs/monitor
+
 ![pict](splunk_files_directories.png)
 
 **From Kali authentication:**
@@ -249,9 +255,11 @@ Created the new searches and saved to the RPI4 dashboard:
 * RPI4 SSH invalid users per Country last week: source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by Country | sort - count
 * RPI4 SSH invalid users per city last day: * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 And I was able to create a dashboard with ssh attacks to the RPi:
+
 ![pict](splunk_dashboard_rpi4.png)
 
 And this dashboard for Kali, with Suricata data:
+
 ![pict](splunk_dashboard_kali.png)
 
 ### collect logs from home web server
@@ -281,9 +289,11 @@ sudo systemctl restart rsyslog
 
 ### Push Splunk alarms to Slack
 In Splunk, configure the alert, add actions and select the "Slack" add-on, select the channel and configure the message:
+
 ![pic](suricata_alarm_config_1.png)
 
 I scheduled alarms in my Slack for mobile: 
+
 ![pic](splunk_to_slack_alarm_mobile_1.png).
 
 However, the message is not populated as I expected. The link also fails because the link refers the machine local name.
@@ -295,9 +305,11 @@ However, the message is not populated as I expected. The link also fails because
 
 ### Splunk not working anymore as the free license is not enough for all use cases:**
 ```Error in 'rtlitsearch' command: Your Splunk license expired or you have exceeded your license limit too many times. Renew your Splunk license by visiting www.splunk.com/store or calling 866.GET.SPLUNK```
+
 ![pict](splunk_licensing_notification.png)
 
 So, I've changed the license to the free license, and restarted splunk.
+
 ![pict](splunk_licensing_change.png)
 
 Then found that the indexers are indexing too fast and getting too big. In http://192.168.1.151:8000/en-US/manager/search/data/indexes confirmed the main db was at 4.58GB after 2 months.
@@ -384,6 +396,7 @@ sudo iptables -L -n -v | grep REJECT | wc -l
 653
 ```
 However, the impacts in SSH logging is huge: the ammount of SSH rejections reduced from 20k to under 500 per day:
+
 ![pict](fail2ban_impact.jpg)
 
 Note:
