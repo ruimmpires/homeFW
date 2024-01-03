@@ -390,8 +390,8 @@ Note:
 configure  /etc/fail2ban/jail.local with 
 ```
 [sshd]
-#Set ban time to 5 minutes
-bantime = 300
+#Set ban time to 1 day
+bantime = 86400
 #Decrease the number of failed login attempts before banning to 3
 maxretry=3
 ```
@@ -430,6 +430,11 @@ Splunk:
 ```
 source="tcp:514" "f2b_line_count DATE" host=rpi2 | timechart avg(IPTABLES)
 ```
+
+As after one day the IP is authorized again, the list of IPs banned is not increasing too much, but rather stays between 100 and 200:
+
+![pict](splunk_Fail2Ban.png.jpg)
+
 
 ## 6th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
