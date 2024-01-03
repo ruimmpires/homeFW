@@ -383,7 +383,7 @@ After a few days, I tried checking how many IPs were being rejected and the list
 sudo iptables -L -n -v | grep REJECT | wc -l
 653
 ```
-However, the impacts in SHS logging is huge: the ammount of SSH rejections reduced from 20k to under 500 per day:
+However, the impacts in SSH logging is huge: the ammount of SSH rejections reduced from 20k to under 500 per day:
 ![pict](fail2ban_impact.jpg)
 
 Note:
@@ -433,7 +433,7 @@ source="tcp:514" "f2b_line_count DATE" host=rpi2 | timechart avg(IPTABLES)
 
 As after one day the IP is authorized again, the list of IPs banned is not increasing too much, but rather stays between 100 and 200:
 
-![pict](splunk_Fail2Ban.png.jpg)
+![pict](splunk_Fail2Ban.png)
 
 
 ## 6th iteration - remaining weaknesses
