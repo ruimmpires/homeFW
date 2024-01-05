@@ -356,6 +356,7 @@ Splunk:
 source="tcp:514" "systemstats DATE" host=rpi2 | timechart avg(CPU) avg(RAM) avg(HDD)
 ```
 **Note: the CPU of RaspberryPi 2 gets to 100% everytime the crontab runs.**
+**Note: in Kali, probably due to security concerns, I was not able to have rsyslog collecing the log from my own folder. So, I created the log in /var/log, and for that I used sudo crontab.**
 
 ##  5th iteration - reduce ssh attacks with fail2ban
 fail2ban is a simple tool that by analyzing logs, discovers repeated failed authentication attempts and automatically sets firewall rules to drop traffic originating from the offender’s IP address.
