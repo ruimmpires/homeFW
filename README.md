@@ -330,6 +330,9 @@ Not happy with the above, I created a script to collect CPU, MEM and HDD, and se
 systemstats.sh
 ```
 echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM= `free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}'`"
+
+and specifically for the raspberry, including temperature:
+echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM= `free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}', TEMP=`vcgencmd measure_temp | awk -F "=" '{print $2}' | awk -F "'" '{print $1}'`%"
 ```
 Install the rsyslog with sudo apt-get install rsyslog
 sudo nano /etc/rsyslog.d/systemstats.conf
