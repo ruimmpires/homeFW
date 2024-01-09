@@ -520,10 +520,12 @@ This dashboard aims at monitoring the security attacks agains my home servers: r
 * collects data via syslog. All home servers are sending these. Uses regex and iplocation to identify the country.
 * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 
-**RPI4 SystemStats**
-* collects data via syslog. All home servers are sending these. The systemstats are collected with the script **systemstats.sh**.
-```echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM=`free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}'`, TEMP=`vcgencmd measure_temp | awk -F "=" '{print $2}' | awk -F "'" '{print $1}'`%"```
- Every 5 minutes, via crontab, it runs: */1 * * * * sh /home/rpires/systemstats.sh >> /home/rpires/systemstats.log. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
+**RPI2 SystemStats**
+* collects data via syslog. All home servers are sending these. The systemstats are collected with the script systemstats.sh.
+```
+echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM=`free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}'`, TEMP=`vcgencmd measure_temp | awk -F "=" '{print $2}' | awk -F "'" '{print $1}'`%"
+```
+Every 5 minutes, via crontab, it runs: */1 * * * * sh /home/rpires/systemstats.sh >> /home/rpires/systemstats.log. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
 ```
 module(load="imfile" PollingInterval="1") #needs to be done just once
 input(type="imfile"
@@ -531,7 +533,205 @@ input(type="imfile"
       Tag="systemstats"
       Facility="local0")
 ```
+* source="tcp:514" "systemstats DATE" host=rpi2| timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+**RPI4 SystemStats**
+* collects data via syslog. All home servers are sending these. Similar to the above.
 * source="tcp:514" "systemstats DATE" host=rpi4| timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+**RPI2 Fail2Ban IPs**
+* collects data via syslog. All home servers are sending these. The monitored file is created by the script f2b_line_count.sh
+```
+echo "DATE=`date -u +"%Y.%m.%d %T"`, IPTABLES=$(sudo iptables -L -n -v | grep REJECT | wc -l)" >> /home/rpires/f2b_line_count.log
+```
+These iptables are automatically created by the service fail2ban. The script rusn via crontab every hour 0 * * * * sh /home/rpires/f2b_line_count.sh and counts the number of new rules and exports this to the log file that is monitored by rsyslog:
+```
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/home/rpires/f2b_line_count.log"
+      Tag="f2b_line_count"
+      Facility="local0")
+```
+* source="tcp:514" "f2b_line_count DATE" host=rpi2 | timechart max(IPTABLES)
+
+**RPI4 Fail2Ban IPs**
+* collects data via syslog. All home servers are sending these. Similar to the above.
+* source="tcp:514" "f2b_line_count DATE" host=rpi2 | timechart max(IPTABLES)
+
+### Home stats dashboard
+This dashboard aims at monitoring the connectivity of my most important hosts at home
+![pict](splunk_dashboard_homestats.png)
+
+**RPI2 system stats**
+* collects data via syslog. All home servers are sending these. Explained above.
+* source="tcp:514" "systemstats DATE" host=rpi2 | timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+**RPI4 system stats**
+* collects data via syslog. All home servers are sending these. Explained above.
+* source="tcp:514" "systemstats DATE" host=rpi4 | timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+**RPI4 system stats**
+* collects data via syslog. All home servers are sending these. Explained above.
+* source="tcp:514" "systemstats DATE" host=rpi5 | timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+**Kali system stats**
+* collects data via syslog. All home servers are sending these. Explained above.
+* source="tcp:514" "systemstats DATE" host=kali | timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+* **Parrot system stats**
+* collects data via syslog. All home servers are sending these. Explained above.
+* source="tcp:514" "systemstats DATE" host=parrot | timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
+**Number of hosts at home**
+* collects data via syslog. All home servers are sending these. The number of hosts is collected with the script hosts_count_nmap.sh.
+```
+#!/bin/bash
+subnet="192.168.1.0/24"  # Change this to your subnet
+up_count=$(nmap -sn $subnet | grep "Host is up" | wc -l)
+echo "Number of hosts up: $up_count"
+date >> /var/log/hosts_count.log
+echo "hosts=$up_count" >> /var/log/hosts_count.log
+```
+Every hour, via crontab, it runs: 3 * * * * /home/rpires/hosts_count_nmap.sh. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
+```
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/var/log/hosts_count.log"
+      Tag="hosts_count"
+      Facility="local0")
+```
+* source="tcp:514" host="kali" "hosts_count" | timechart avg(hosts)
+
+**Connectivity to important hosts**
+* collects data via syslog. All home servers are sending these. The icmp echo delay is collected with the script hosts_count_nmap.sh.
+```
+#!/bin/bash
+
+# File containing the list of hosts (one per line)
+hosts_file="ping_hosts.txt"
+
+# Check if the hosts file exists
+if [ ! -e "$hosts_file" ]; then
+    echo "Error: Hosts file '$hosts_file' not found."
+    exit 1
+fi
+
+# Read hosts from the file into an array
+mapfile -t hosts < "$hosts_file"
+
+# initiate the output file
+#touch ping_results.log
+#echo "" > ping_results.log
+
+date >> /var/log/ping_results.log
+
+# Function to ping a host and print the round-trip time
+ping_host() {
+    host=$1
+    echo -n "Pinging $host..."
+    result=$(ping -c 4 -n -q "$host" 2>&1 | awk -F'/' 'END {print $5}')
+    if [ -n "$result" ]; then
+        echo "Round-trip time: $result ms"
+        echo "$host=$result" >> /var/log/ping_results.log
+    else
+        echo "Failed to ping $host"
+        echo "$host=1000" >> /var/log/ping_results.log
+    fi
+}
+
+# Loop through the list of hosts and ping each one
+for host in "${hosts[@]}"; do
+    ping_host "$host"
+done
+```
+Every few minutes, via crontab, it runs: */1 * * * * /home/rpires/ping_script.sh. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
+```
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/var/log/ping_results.log"
+      Tag="ping_results"
+      Facility="local0")
+```
+I used a timechart and a heat map https://splunkbase.splunk.com/app/4460
+* source="tcp:514" host="kali" "ping_results" | timechart avg(churrasqueira) avg(rpi2) avg(rpi4) avg(rpi5) avg(printer) avg(kali) avg(parrot) avg(router) avg(sala) avg(escritorio) avg(1a) avg(google)
+
+### MQTT dashboard
+This dashboard aims at showuing in a GUI some MQTT data I collect at home.
+![pict](splunk_dashboard_mqtt.png)
+
+I have mosquitto running in a local server and several ESPs collecting data every 10s. I created a script that runs every 5 minutes: */5 * * * * /home/rpires/mqttlog.sh.
+The script is still a work in progress, but already collects the necessary data to a log file:
+```
+#!/bin/bash
+
+broker="192.168.1.201"  # Change this to the address of your MQTT broker
+topics=("home/hum/1/tx" "home/temp/1/tx" "home/watertemp/1/tx" "home/clamp/1")
+shorts=("hum" "temp" "watertemp" "power")
+log_file="mqttlog.log"
+
+trap 'kill $(jobs -p)' EXIT  # Ensure background processes are terminated on script exit
+
+START=$(date +%s)
+
+
+#still missing a time out solution
+#while [[ $(($(date +%s) - $START)) -lt 300 ]]
+#do
+    #do something here
+#done
+
+
+subscribe_to_topic() {
+for i in  ${!topics[@]}; do
+#  while [[ $(($(date +%s) - $START)) -lt 20 ]]
+  #do
+  echo "subscribing to the topic: ${topics[$i]}"
+  timestamp=$(date +"%Y-%m-%d %H:%M:%S")
+  #echo "duration of the scrpit $(($(date +%s) - $START))"
+  data=$(mosquitto_sub -h "$broker" -t "${topics[$i]}" -C 1)
+  #echo "duration of the scrpit $(($(date +%s) - $START))"
+  #if [[ $(($(date +%s) - $START)) -gt 30 ]] ; then
+  #  break
+    #echo "$(($(date +%s) - $START))"
+  #fi
+
+  if [ -n "$data" ]; then
+    #echo "$i"
+    echo "Received data for ${topics[$i]}: $data"
+    #echo "$timestamp - '${topics[$i]}'=$data" >> "$log_file"
+    echo "$timestamp - ${shorts[$i]}=$data" >> "$log_file"
+  else
+    #echo "$i"
+    echo "$timestamp - No data received for ${topics[$i]}."
+    #echo "$timestamp - No data received for ${shorts[$i]}."
+  fi
+  #i=i+1
+  #done
+done
+}
+
+# Subscribe to each topic in the background
+#for n in "${topics[@]}"; do
+#  echo "subscribing to the topics: $n "
+  subscribe_to_topic &
+#done
+
+# Wait for all background processes to finish
+wait
+
+
+```
+This script is monitored via rsyslog:
+```
+/etc/rsyslog.d/systemstats.conf
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/home/rpires/mqttlog.log"
+      Tag="mqtt"
+      Facility="local0")
+```      
+* source="tcp:514" "mqtt" host=rpi4 |  timechart avg(watertemp)
+All others are similar
 
 ## 7th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
