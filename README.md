@@ -462,16 +462,19 @@ So, to avoid losing my work and requiring me to reinvent the wheel, here are my 
 **SURICATA alert events**
 * no scripts required. Splunk collects the local events json file.
 * source="/var/log/suricata/eve.json" AND event_type=alert | timechart count
+  
 **SURICATA attacks per ports, time series**
 * no scripts required. Splunk collects the local alarms file.
 * source="/var/log/suricata/fast.log" AND "Attack" AND (dest_port=80 OR dest_port=22 OR dest_port=1883)  | timechart count by dest_port
+  
 **SURICATA attacks per ports**
 * no scripts required. Splunk collects the local alarms file.
 * source="/var/log/suricata/fast.log" AND "Attack" | top limit=10 dest_port
+  
 **SURICATA attacks per IP, city and country**
 * no scripts required. Splunk collects the local alarms file. splunk gets the city and country from the **iplocation** https://docs.splunk.com/Documentation/Splunk/9.1.2/SearchReference/Iplocation
 * source="/var/log/suricata/fast.log" AND "Attack" | stats count by src_ip  |iplocation src_ip | sort -count | table src_ip count City Country
-* 
+  
 ## 7th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
 
