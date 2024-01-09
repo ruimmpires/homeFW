@@ -457,6 +457,7 @@ Splunk got to be an addiction!
 So, to avoid losing my work and requiring me to reinvent the wheel, here are my dashboards, the search queries, and the scripts that make it work:
 
 ### Suricata dashboard
+This dashboard aims at monitoring the suricata.
 ![pict](splunk_dashboard_suricata.png)
 
 **SURICATA alert events**
@@ -474,7 +475,62 @@ So, to avoid losing my work and requiring me to reinvent the wheel, here are my 
 **SURICATA attacks per IP, city and country**
 * no scripts required. Splunk collects the local alarms file. splunk gets the city and country from the **iplocation** https://docs.splunk.com/Documentation/Splunk/9.1.2/SearchReference/Iplocation
 * source="/var/log/suricata/fast.log" AND "Attack" | stats count by src_ip  |iplocation src_ip | sort -count | table src_ip count City Country
-  
+
+**SURICATA attacks per country in map**
+* no scripts required. Splunk collects the local alarms file. splunk gets the city and country from the **iplocation** https://docs.splunk.com/Documentation/Splunk/9.1.2/SearchReference/Iplocation. Uses the splunk geom package for the visualization https://docs.splunk.com/Documentation/Splunk/9.1.2/SearchReference/geom.
+* source="/var/log/suricata/fast.log" AND "Attack" |iplocation src_ip | stats count by Country |geom geo_countries allFeatures=True featureIdField=Country
+
+**SURICATA events per destination**
+* no scripts required. Splunk collects the local events json file.
+* source="/var/log/suricata/eve.json" AND event_type=flow |  stats count by src_ip
+
+**SURICATA events per source**
+* no scripts required. Splunk collects the local events json file.
+* source="/var/log/suricata/eve.json" AND event_type=flow |  stats count by dest_ip
+
+**SURICATA events per event type**
+* no scripts required. Splunk collects the local events json file.
+* source="/var/log/suricata/eve.json" |  stats count by event_type
+
+**KALI Invalid logins**
+* no scripts required. Splunk collects the local security log and applies a regex.
+* sourcetype=KaliAuthLog AND "invalid" | rex field=_raw "(?<clientip>[[ipv4]])" | timechart count
+
+### Home servers dashboard
+This dashboard aims at monitoring the security attacks agains my home servers: rpi2 and rpi4
+![pict](splunk_dashboard_homeservers.png)
+
+**SSH auth failures**
+* collects data via syslog. All home servers are sending these.
+* source="tcp:514" "authentication failure" "user=" | timechart count
+
+**SSH auth failures username**
+* collects data via syslog. All home servers are sending these. Identifies the usernames used.
+* source="tcp:514" "authentication failure" "user=" | rex "(user=)(?<UnauthUser>\w+)" | stats count by UnauthUser | sort -count
+
+**SSH invalid users**
+* collects data via syslog. All home servers are sending these.
+* source="tcp:514" "Invalid user" | timechart count
+
+**SSH invalid users per Country**
+* collects data via syslog. All home servers are sending these. Uses regex and iplocation to identify the country.
+* source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by Country | sort - count
+
+**SSH invalid users per City**
+* collects data via syslog. All home servers are sending these. Uses regex and iplocation to identify the country.
+* source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
+
+**RPI4 SystemStats**
+* collects data via syslog. All home servers are sending these. The systemstats are collected with the script **systemstats.sh**. Every 5 minutes, via crontab, it runs: */1 * * * * sh /home/rpires/systemstats.sh >> /home/rpires/systemstats.log. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
+```
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/home/rpires/systemstats.log"
+      Tag="systemstats"
+      Facility="local0")
+```
+* source="tcp:514" "systemstats DATE" host=rpi4| timechart avg(CPU) avg(RAM) avg(HDD) avg(TEMP)
+
 ## 7th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
 
