@@ -521,7 +521,9 @@ This dashboard aims at monitoring the security attacks agains my home servers: r
 * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 
 **RPI4 SystemStats**
-* collects data via syslog. All home servers are sending these. The systemstats are collected with the script **systemstats.sh**. Every 5 minutes, via crontab, it runs: */1 * * * * sh /home/rpires/systemstats.sh >> /home/rpires/systemstats.log. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
+* collects data via syslog. All home servers are sending these. The systemstats are collected with the script **systemstats.sh**.
+```echo "DATE=`date -u +"%Y.%m.%d %T"`, CPU=`LC_ALL=C top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'`%, RAM=`free -m | awk '/Mem:/ { printf("%3.1f%%", $3/$2*100) }'`, HDD=`df -h / | awk '/\// {print $(NF-1)}'`, TEMP=`vcgencmd measure_temp | awk -F "=" '{print $2}' | awk -F "'" '{print $1}'`%"```
+ Every 5 minutes, via crontab, it runs: */1 * * * * sh /home/rpires/systemstats.sh >> /home/rpires/systemstats.log. The log is captured via the configuration of rsyslog configuration file:  /etc/rsyslog.d/systemstats.conf
 ```
 module(load="imfile" PollingInterval="1") #needs to be done just once
 input(type="imfile"
