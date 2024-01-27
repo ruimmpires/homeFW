@@ -56,6 +56,8 @@ curl -A Blacksun http://example.com
 curl https://testmyids.com
 ```
 note, in this test I reverted the dip-switch to the outbound but cań't see any result!
+Note: this works fine for testing outgoing: curl http://testmynids.org/uid/index.html
+
 
 ### Results
 I am only interested in the packets coming from the Internet, so the dip-switch is always in the inbound position.
