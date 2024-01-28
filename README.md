@@ -279,14 +279,29 @@ The data may be useful:
  * method
  * requestor system
 
-Let's try to send it to splunk via syslog:
-WRONG!!!!
+Let's  send it to splunk via syslog:
 ```
-sudo nano /etc/rsyslog.conf
+sudo nano /etc/rsyslog.d/systemstats.conf
 ...
-lightttpd.*                 /var/log/lighttpd/access.log
+module(load="imfile" PollingInterval="1") #needs to be done just once
+input(type="imfile"
+      File="/var/log/lighttpd/access.log"
+      Tag="lighttpd_access"
+      Facility="local0")
 
-sudo systemctl restart rsyslog
+input(type="imfile"
+      File="/var/log/lighttpd/error.log"
+      Tag="lighttpd_error"
+      Facility="local0")
+```
+
+```
+sudo nano /etc/lighttpd/lighttp.conf
+...
+server.modules = (
+        "mod_accesslog",
+)
+acesslog.filename           = "/var/log/lighttpd/access.log"
 ```
 
 ### Push Splunk alarms to Slack
