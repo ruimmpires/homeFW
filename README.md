@@ -537,6 +537,30 @@ This dashboard aims at monitoring the security attacks agains my home servers: r
 * collects data via syslog. All home servers are sending these. Uses regex and iplocation to identify the country.
 * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 
+**Lighttpd access logs
+*uses the access.log from lighttpd sent via syslog: table
+*source="tcp:514" "lighttpd_access" 
+|  table _time src_ip status OS  message 
+*uses the access.log from lighttpd sent via syslog: table
+*source="tcp:514" "lighttpd_access": pie chart
+|  stats count by src_ip
+
+**Lighttpd missile map
+*uses the access.log from lighttpd sent via syslog
+*source="tcp:514" "lighttpd_access" 
+| iplocation lighttpd_src_ip prefix=start_
+| iplocation lighttpd_dest_ip prefix=end_
+| iplocation src_ip 
+| search start_Country="*" end_Country="*"
+| rename status AS app 
+| table _time src_ip Country start_lat start_lon end_lat end_lon app
+| eval animate="yes", pulse_at_start="yes"
+| eval color = case (
+	match(app, "200"), "#c0392b",
+    match(app, "404"), "#e67e22",
+    match(app, "304"), "#f1c40f",
+    1==1, "#7f8c8d")
+
 **RPI2 SystemStats**
 * collects data via syslog. All home servers are sending these. The systemstats are collected with the script systemstats.sh.
 ```
