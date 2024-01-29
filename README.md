@@ -513,6 +513,19 @@ This dashboard aims at monitoring the suricata.
 * no scripts required. Splunk collects the local security log and applies a regex.
 * sourcetype=KaliAuthLog AND "invalid" | rex field=_raw "(?<clientip>[[ipv4]])" | timechart count
 
+**Suricata attacks in missile map**
+*source="/var/log/suricata/eve.json" AND "Attack" 
+| iplocation src_ip prefix=start_
+| eval end_lat="40"
+| eval end_lon="-8" | rename dest_port AS app 
+| table _time src_ip Country start_lat start_lon end_lat end_lon app| eval color = case (
+	match(app, "22"), "#c0392b",
+    match(app, "403"), "#e67e22",
+    match(app, "57621"), "#f1c40f",
+    1==1, "#7f8c8d")
+
+![pict](splunk_dashboard_splunk_missilemap.png)
+
 ### Home servers dashboard
 This dashboard aims at monitoring the security attacks agains my home servers: rpi2 and rpi4
 ![pict](splunk_dashboard_homeservers.png)
@@ -537,7 +550,7 @@ This dashboard aims at monitoring the security attacks agains my home servers: r
 * collects data via syslog. All home servers are sending these. Uses regex and iplocation to identify the country.
 * source="tcp:514" "Invalid user"  | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip | stats count by City | sort - count
 
-**Lighttpd access logs
+**Lighttpd access logs**
 *uses the access.log from lighttpd sent via syslog: table
 *source="tcp:514" "lighttpd_access" 
 |  table _time src_ip status OS  message 
@@ -545,21 +558,29 @@ This dashboard aims at monitoring the security attacks agains my home servers: r
 *source="tcp:514" "lighttpd_access": pie chart
 |  stats count by src_ip
 
-**Lighttpd missile map
+**Lighttpd missile map**
 *uses the access.log from lighttpd sent via syslog
 *source="tcp:514" "lighttpd_access" 
 | iplocation lighttpd_src_ip prefix=start_
 | iplocation lighttpd_dest_ip prefix=end_
-| iplocation src_ip 
-| search start_Country="*" end_Country="*"
+| iplocation src_ip | search start_Country="*" end_Country="*"
 | rename status AS app 
 | table _time src_ip Country start_lat start_lon end_lat end_lon app
-| eval animate="yes", pulse_at_start="yes"
 | eval color = case (
 	match(app, "200"), "#c0392b",
     match(app, "404"), "#e67e22",
     match(app, "304"), "#f1c40f",
     1==1, "#7f8c8d")
+
+**ssh atacks missile map**
+source="tcp:514" ("Invalid user" OR "authentication failure") | rex field=_raw "(?<src_ip>[[ipv4]])" | iplocation src_ip prefix=start_
+| iplocation src_ip
+|  eval end_lat="40"
+| eval end_lon="-8" 
+| table _time src_ip Country start_lat start_lon end_lat end_lon
+note: removed the animate as it makes the splunk too slow: | eval animate="yes", pulse_at_start="yes"
+
+![pict](splunk_dashboard_web_ssh_servers.png)
 
 **RPI2 SystemStats**
 * collects data via syslog. All home servers are sending these. The systemstats are collected with the script systemstats.sh.
