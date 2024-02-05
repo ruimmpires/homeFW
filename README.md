@@ -805,28 +805,23 @@ One idea would be to report the IPs of fail2ban such as using the https://www.ab
 An initial step is to check what an external adversary can see when accessing my ISP router.
 ```
 sudo nmap -sV <my server>
-PORT     STATE SERVICE     VERSION
-21/tcp   open  ftp         D-Link/Comtrend DSL modem ftp firmware update
-22/tcp   open  ssh         Dropbear sshd 2017.75 (protocol 2.0)
-23/tcp   open  telnet
-80/tcp   open  http        lighttpd 1.4.53
-139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
-443/tcp  open  tcpwrapped
-445/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
-1883/tcp open  mqtt
-2222/tcp open  ssh         OpenSSH 7.9p1 Raspbian 10+deb10u2+rpt1 (protocol 2.0)
-5060/tcp open  sip         PTInS GR241AG Build 3RGW040C01r003 (Status: 404 Not Found)
-8080/tcp open  http-proxy?
-8089/tcp open  unknown
-9876/tcp open  sd?
-9877/tcp open  unknown
-```
-##### ftp, ssh, telnet, ...  open?
-This is the router itself, as configured by my ISP. Is it well protected?
-#### 2222/tcp open  ssh         OpenSSH 7.9p1 Raspbian 10+deb10u2+rpt1 (protocol 2.0)
-This is the port forwarding to my raspberry ssh server. How secure is it? Do I need it? Maybe better close it!
-#### 80/tcp   open  http        lighttpd 1.4.53
-This is the port forwarding to my raspberry web server. How secure is it? Maybe I should make some effort and use only https
-#### 1883/tcp open  mqtt
-This is the port forwarding to my mosquitto server. How secure is it? How can I improve its security
+PORT     STATE  SERVICE    VERSION
+80/tcp   open   http lighttpd 1.4.69
+113/tcp  closed ident
+443/tcp	 closed https 
+2222/tcp open   tcpwrapped
+8000/tcp open   tcpwrapped
 
+```
+#### 2222/tcp open  ssh         
+This is the port forwarding to my raspberry ssh server. How secure is it? Do I need it? Maybe better close it! However is great to lure and detect attackers.
+#### 80/tcp   open  http        lighttpd 1.4.53
+This is the port forwarding to my raspberry web server. How secure is it? Maybe I should make some effort and use only https.
+#### 443/tcp   closed  https
+I thought this 443 was open.
+#### 1883/tcp open  mqtt
+This is the port forwarding to my mosquitto server. How secure is it? How can I improve its security.
+#### 8000/tcp open  splunk server
+This is the port forwarding to my splunk server. I need it
+#### 113/tcp closed ident
+This should not be open. I am surprised.
