@@ -797,6 +797,7 @@ All others are similar
 
 To collect the latest value: source="tcp:514" "mqtt" host=rpi4 | stats latest(_time) as _time, latest(power)
 
+
 ## 7th iteration - remaining weaknesses
 One idea would be to report the IPs of fail2ban such as using the https://www.abuseipdb.com/
 
