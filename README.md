@@ -665,7 +665,7 @@ input(type="imfile"
 * source="tcp:514" host="kali" "hosts_count" | timechart avg(hosts)
 
 **Connectivity to important hosts**
-* collects data via syslog. All home servers are sending these. The icmp echo delay is collected with the script hosts_count_nmap.sh.
+* collects data via syslog. All home servers are sending these. The icmp echo delay is collected with the script ping_script.sh.
 ```
 #!/bin/bash
 
@@ -685,6 +685,7 @@ mapfile -t hosts < "$hosts_file"
 #touch ping_results.log
 #echo "" > ping_results.log
 
+#add the date in the log
 date >> /var/log/ping_results.log
 
 # Function to ping a host and print the round-trip time
@@ -717,6 +718,7 @@ input(type="imfile"
 I used a timechart and a heat map https://splunkbase.splunk.com/app/4460
 * source="tcp:514" host="kali" "ping_results" | timechart avg(churrasqueira) avg(rpi2) avg(rpi4) avg(rpi5) avg(printer) avg(kali) avg(parrot) avg(router) avg(sala) avg(escritorio) avg(1a) avg(google)
 
+You may also look into this solution: https://github.com/sanathp/statusok
 ### MQTT dashboard
 This dashboard aims at showuing in a GUI some MQTT data I collect at home.
 ![pict](splunk_dashboard_mqtt.png)
@@ -808,7 +810,8 @@ sudo nmap -sV <my server>
 PORT     STATE  SERVICE    VERSION
 80/tcp   open   http lighttpd 1.4.69
 113/tcp  closed ident
-443/tcp	 closed https 
+443/tcp	 closed https
+1883/tcp open mqtt
 2222/tcp open   tcpwrapped
 8000/tcp open   tcpwrapped
 
@@ -820,8 +823,10 @@ This is the port forwarding to my raspberry web server. How secure is it? Maybe 
 #### 443/tcp   closed  https
 I thought this 443 was open.
 #### 1883/tcp open  mqtt
-This is the port forwarding to my mosquitto server. How secure is it? How can I improve its security.
+This is the port forwarding to my mosquitto server. How secure is it? How can I improve its security? 
 #### 8000/tcp open  splunk server
-This is the port forwarding to my splunk server. I need it
+This is the port forwarding to my splunk server. I need it.
 #### 113/tcp closed ident
 This should not be open. I am surprised.
+
+Following steps in my MITTRE analysys in this same repository
