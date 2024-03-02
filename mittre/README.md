@@ -5,10 +5,7 @@ This first iteration is based on the status where there were some exposed servic
 
 | Tactics	| Techniques | Sub-tech	| Attack details	| Results	| Mitigations	| Detection	| Issues |
 |---|---|---|---|---|---|---|---|
-|Reconnaissance TA0043	| Active Scanning	T1595	| 0.001	Scanning IP Blocks	| connected via a mobile phone to get an externl IP ping home.pires.xyz results the 2.80.44.128
-sudo nmap -sV | IP is 2.80.44.128
-sudo nmap -sV home.rpires.xyz
-DNS record for 2.80.44.128: bl19-44-128.dsl.telepac.pt
+|Reconnaissance TA0043	| Active Scanning	T1595	| 0.001	Scanning IP Blocks	| connected via a mobile phone to get an externl IP ping home.pires.xyz results the 2.80.44.128 sudo nmap -sV | IP is 2.80.44.128 sudo nmap -sV home.rpires.xyz DNS record for 2.80.44.128: bl19-44-128.dsl.telepac.pt
 PORT     STATE  SERVICE  VERSION
 80/tcp   open   http     lighttpd 1.4.69
 113/tcp  closed ident
