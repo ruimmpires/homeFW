@@ -1,10 +1,10 @@
 # MITTRE ATTACK analysis
 
 # **Iteration 1**
-This first iterationis based on the status where there were some exposed services
+This first iteration is based on the status where there were some exposed services.
 
 | Tactics	| Techniques |	Tech	| Sub-tech	| Attack details	| Results	| Mitigations	| Detection	| Issues |
-|---|---|---|---|---|---|---|---|---|---|---|---|
+|---|---|---|---|---|---|---|---|---|
 |Reconnaissance TA0043	| Active Scanning	T1595	| 0.001	Scanning IP Blocks	| connected via a mobile phone to get an externl IP ping home.pires.xyz results the 2.80.44.128
 sudo nmap -sV | IP is 2.80.44.128
 sudo nmap -sV home.rpires.xyz
