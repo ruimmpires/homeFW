@@ -35,7 +35,8 @@ cat /etc/shadow
 root:!:18764:0:99999:7:::  
 ....  
 user:$y$j9T$6Yi8mmJLaFPUnsIb/EUE31$9iJbm1a7TR/8SPry4ilRUqf5dQqcw1mDJlbdjRSGwsC:18764:0:99999:7:::  
-
+splunk:!:19615:0:99999:7:::  
+splunkfwd:!:19711:0:99999:7:::  
 
 # **Iteration 2**
 This iteration is based on the status where the splunk server is protected with a reverse proxy and further detections were added to Splunk.
