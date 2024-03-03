@@ -54,14 +54,15 @@ Check it out at http://home.rpires.xyz
 Try it at https://home.rpires.xyz:8000
 
 ### Monitored splunk log
-...
+Added a new dashboard for splunk access logs.
+Couldn't find the log files, that should be stored in /var/log/splunk/.
 
 
 ## Future mitigations
 * Replace Splunk with a FOSS.
 * move the webpage to https/443
 * add authentication and encryption to MQTT. Need to assess if the ESPs can support
-
+* track spluk users logs in splunk
   
 # **Iteration 2**
 This iteration is based on the status where the splunk server is protected with a reverse proxy and further detections were added to Splunk.
