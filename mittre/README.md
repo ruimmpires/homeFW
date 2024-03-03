@@ -42,6 +42,26 @@ splunkfwd:!:19711:0:99999:7:::
 You can do RCE using the forwarder.
 Exploit Overview: An exploit targeting the Splunk Universal Forwarder Agent (UF) allows attackers with the agent password to execute arbitrary code on systems running the agent, potentially compromising an entire network.  
 Explained here https://book.hacktricks.xyz/linux-hardening/privilege-escalation/splunk-lpe-and-persistence and code here https://github.com/cnotin/SplunkWhisperer2/tree/master/PySplunkWhisperer2
+Haven't tried this yet, however there are may potential victims available in Shodam.
 
+## Mitigations done
+### Improved homepage
+The homepage was outdated following a previous crash of raspberryPi.
+Check it out at http://home.rpires.xyz
+
+### Hide splunk behind a reverse proxy
+...  
+Try it at https://home.rpires.xyz:8000
+
+### Monitored splunk log
+...
+
+
+## Future mitigations
+* Replace Splunk with a FOSS.
+* move the webpage to https/443
+* add authentication and encryption to MQTT. Need to assess if the ESPs can support
+
+  
 # **Iteration 2**
 This iteration is based on the status where the splunk server is protected with a reverse proxy and further detections were added to Splunk.
