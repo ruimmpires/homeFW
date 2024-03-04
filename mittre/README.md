@@ -17,10 +17,10 @@ After this initial access, the whole network is at stake, as the adversaty could
 ## Attack steps and demo
 * Guide: https://book.hacktricks.xyz/network-services-pentesting/1883-pentesting-mqtt-mosquitto
 * Code: https://github.com/0xjpuff/reverse_shell_splunk
-Step 1: git clone https://github.com/0xjpuff/reverse_shell_splunk
-Step 2: edit the attacker IP (own IP) and specicy a new port
-Step 3: tar and then rename to be packaged as a splunk app
-Step 4: deploy in the target splunk, and then reboot
+Step 1: git clone https://github.com/0xjpuff/reverse_shell_splunk  
+Step 2: edit the attacker IP (own IP) and specicy a new port  
+Step 3: tar and then rename to be packaged as a splunk app  
+Step 4: deploy in the target splunk, and then reboot  
 
 ![pic](splunk_install_app.png)
 
